@@ -3,6 +3,8 @@ import { CheckIcon } from '@heroicons/react/outline'
 import { MiniGrid } from '../mini-grid/MiniGrid'
 import { shareStatus } from '../../lib/share'
 import { BaseModal } from './BaseModal'
+import { nextRound } from '../../lib/words'
+import Countdown from 'react-countdown'
 
 type Props = {
   isOpen: boolean
@@ -18,7 +20,7 @@ export const WinModal = ({
   handleShare,
 }: Props) => {
   return (
-    <BaseModal title="You won!" isOpen={isOpen} handleClose={handleClose}>
+    <BaseModal title="해냈어요!" isOpen={isOpen} handleClose={handleClose}>
       <div>
         <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
           <CheckIcon className="h-6 w-6 text-green-600" aria-hidden="true" />
@@ -28,14 +30,15 @@ export const WinModal = ({
             as="h3"
             className="text-lg leading-6 font-medium text-gray-900"
           >
-            You won!
+            해냈어요!
           </Dialog.Title>
           <div className="mt-2">
             <MiniGrid guesses={guesses} />
-            <p className="text-sm text-gray-500">Great job.</p>
+            <p className="text-sm text-gray-500">훌륭합니다!</p>
           </div>
         </div>
       </div>
+      <div className="mt-5 sm:mt-6">다음 워들 <Countdown date={nextRound()} daysInHours/></div>
       <div className="mt-5 sm:mt-6">
         <button
           type="button"
@@ -45,7 +48,7 @@ export const WinModal = ({
             handleShare()
           }}
         >
-          Share
+          공유하기
         </button>
       </div>
     </BaseModal>

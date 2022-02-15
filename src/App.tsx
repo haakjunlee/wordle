@@ -14,6 +14,7 @@ import {
   loadGameStateFromLocalStorage,
   saveGameStateToLocalStorage,
 } from './lib/localStorage'
+import ReactGA from 'react-ga'
 
 function App() {
   const [currentGuess, setCurrentGuess] = useState('')
@@ -45,6 +46,10 @@ function App() {
 
   useEffect(() => {
     saveGameStateToLocalStorage({ guesses, solution })
+
+    const TRACKING_ID = "UA-218948322-1"
+    ReactGA.initialize(TRACKING_ID)
+    ReactGA.pageview(window.location.pathname + window.location.search)
   }, [guesses])
 
   useEffect(() => {
@@ -64,6 +69,18 @@ function App() {
   }
 
   const onEnter = () => {
+    ReactGA.event({
+      category: 'User',
+      action: `onEnter-${guesses.length}`,
+      label: currentGuess,
+    })
+
+    console.log({
+      category: 'User',
+      action: `onEnter-${guesses.length}`,
+      label: currentGuess,
+    })
+
     if (!(currentGuess.length === 5) && !isGameLost) {
       setIsNotEnoughLetters(true)
       return setTimeout(() => {
@@ -86,19 +103,39 @@ function App() {
 
       if (winningWord) {
         setStats(addStatsForCompletedGame(stats, guesses.length))
+
+        ReactGA.event({
+          category: 'User',
+          action: 'isGameWon'
+        })
+
         return setIsGameWon(true)
       }
 
       if (guesses.length === 5) {
         setStats(addStatsForCompletedGame(stats, guesses.length + 1))
         setIsGameLost(true)
+
+        ReactGA.event({
+          category: 'User',
+          action: 'isGameLost'
+        })
       }
     }
   }
 
+  function teleportTo(url: string) {
+    ReactGA.event({
+      category: 'Navigation',
+      action: 'teleportTo',
+      label: url
+    })
+    document.location = url
+  }
+
   return (
     <div className="py-8 max-w-7xl mx-auto sm:px-6 lg:px-8">
-      <p>AI Meets Everything, <a href='https://clova.ai'>CLOVA</a></p>
+      <p>AI Meets Everything, <a href='https://clova.ai' onClick={() => teleportTo("https://clova.ai")}>CLOVA</a> - 하루 두 번!</p>
       <div className="flex w-80 mx-auto items-center mb-8">
         <h1 className="text-xl grow font-bold">Wordle (한글 풀어쓰기 5자)</h1>
         <InformationCircleIcon
@@ -122,6 +159,10 @@ function App() {
         handleClose={() => setIsWinModalOpen(false)}
         guesses={guesses}
         handleShare={() => {
+          ReactGA.event({
+            category: 'User',
+            action: 'handleShare'
+          })
           setIsWinModalOpen(false)
           setShareComplete(true)
           return setTimeout(() => {
@@ -135,6 +176,7 @@ function App() {
       />
       <StatsModal
         isOpen={isStatsModalOpen}
+        isGameDone={isGameWon || isGameLost}
         handleClose={() => setIsStatsModalOpen(false)}
         gameStats={stats}
       />
@@ -151,14 +193,14 @@ function App() {
         이 게임에 대하여
       </button>
 
-      <Alert message="Not enough letters" isOpen={isNotEnoughLetters} />
-      <Alert message="Word not found" isOpen={isWordNotFoundAlertOpen} />
+      <Alert message="글자 수가 충분치 않습니다." isOpen={isNotEnoughLetters} />
+      <Alert message="단어를 찾을 수 없습니다." isOpen={isWordNotFoundAlertOpen} />
       <Alert
-        message={`You lost, the word was ${solution}`}
+        message={`실패했어요, 단어는 '${solution}'이었습니다.`}
         isOpen={isGameLost}
       />
       <Alert
-        message="Game copied to clipboard"
+        message="게임 결과가 클립보드에 복사되었어요!"
         isOpen={shareComplete}
         variant="success"
       />

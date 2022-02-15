@@ -12,12 +12,26 @@ export const isWinningWord = (word: string) => {
   return solution === word
 }
 
-export const getWordOfDay = () => {
-  // January 1, 2022 Game Epoch
-  const epochMs = 1643113978753
+export const gameTimeInMs = () => {
+  const epochMs = 1643122800000
   const now = Date.now()
   const msInDay = 86400000 / 2
-  const index = Math.floor((now - epochMs) / msInDay)
+  return {
+    elapsed: (now - epochMs),
+    msInDay,
+    epochMs
+  }
+}
+
+export const nextRound = () => {
+  const {elapsed, msInDay, epochMs} = gameTimeInMs()
+  const index = Math.floor(elapsed / msInDay)
+  return (index+1) * msInDay + epochMs
+}
+
+export const getWordOfDay = () => {
+  const {elapsed, msInDay} = gameTimeInMs()
+  const index = Math.floor(elapsed / msInDay)
 
   return {
     solution: WORDS[index].toUpperCase(),
